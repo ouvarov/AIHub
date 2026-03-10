@@ -20,6 +20,11 @@ export interface SkillMeta {
   service: string;
   /** What Claude should fetch from other MCPs before calling this skill */
   gather?: string[];
+  /**
+   * JSON example of the expected input structure.
+   * Used to generate the MCP tool description so Claude knows what to pass.
+   */
+  inputSchema?: Record<string, unknown>;
 }
 
 export type Skill<TInput, TOutput> = {
