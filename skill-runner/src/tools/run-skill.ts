@@ -11,9 +11,7 @@ export function registerSkillTools(server: McpServer) {
   // Builder entry point — returns architecture instructions
   server.tool(
     "start_building",
-    `Call this FIRST when user wants to create a new MCP service in AI Hub.
-Returns the architecture rules and templates. You MUST read and follow them before generating any code.
-Trigger words: "создай MCP", "новый сервис", "автоматизировать", "AI Hub", "аи хаб".`,
+    `Call this FIRST when user wants to create a new MCP service in AI Hub.\nReturns the architecture rules and templates. You MUST read and follow them before generating any code.\nTrigger words: "создай MCP", "новый сервис", "автоматизировать", "AI Hub", "аи хаб".`,
     {},
     async () => {
       // Fetch CLAUDE.md and TEMPLATE.md from GitHub
@@ -61,12 +59,15 @@ Trigger words: "создай MCP", "новый сервис", "автомати�
 
   // Register each skill as a tool
   for (const skill of skills) {
-    // Build description with gather instructions
+    // Build description with gather instructions + input schema hint
     let description = skill.meta.description;
     if (skill.meta.gather && skill.meta.gather.length > 0) {
       description += "\nBEFORE calling this skill, use your available MCP tools to gather:\n";
       description += skill.meta.gather.map((g, i) => `${i + 1}. ${g}`).join("\n");
       description += "\nPass the gathered data as JSON input.";
+    }
+    if (skill.meta.inputSchema) {
+      description += `\n\nExpected input JSON structure:\n${JSON.stringify(skill.meta.inputSchema, null, 2)}`;
     }
 
     server.tool(
