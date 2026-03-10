@@ -1,0 +1,101 @@
+name: Deploy MCP Services
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      gateway: ${{ steps.changes.outputs.gateway }}
+      services: ${{ steps.services.outputs.list }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed services
+        id: changes
+        run: |
+          # Check if gateway changed
+          if git diff --name-only HEAD~1 HEAD | grep -q '^gateway/'; then
+            echo "gateway=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "gateway=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Find changed MCP services
+        id: services
+        run: |
+          # Find all dirs with wrangler.jsonc (= deployable services), exclude gateway and _template
+          CHANGED_SERVICES="[]"
+          for dir in $(git diff --name-only HEAD~1 HEAD | grep -v '^gateway/' | grep -v '^_template/' | cut -d'/' -f1 | sort -u); do
+            if [ -f "$dir/wrangler.jsonc" ]; then
+              CHANGED_SERVICES=$(echo "$CHANGED_SERVICES" | jq -c ". + [\"$dir\"]")
+            fi
+          done
+
+          # Also redeploy all services if _shared changed (skills/agents/types affect all)
+          if git diff --name-only HEAD~1 HEAD | grep -q '^_shared/'; then
+            ALL_SERVICES="[]"
+            for dir in */; do
+              dir="${dir%/}"
+              if [ -f "$dir/wrangler.jsonc" ] && [ "$dir" != "gateway" ] && [ "$dir" != "_template" ]; then
+                ALL_SERVICES=$(echo "$ALL_SERVICES" | jq -c ". + [\"$dir\"]")
+              fi
+            done
+            CHANGED_SERVICES="$ALL_SERVICES"
+          fi
+
+          echo "list=$CHANGED_SERVICES" >> "$GITHUB_OUTPUT"
+          echo "Services to deploy: $CHANGED_SERVICES"
+
+  deploy-services:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.services != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Deploy ${{ matrix.service }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: ${{ matrix.service }}
+
+  deploy-gateway:
+    needs: [detect-changes, deploy-services]
+    if: always() && (needs.detect-changes.outputs.gateway == 'true' || needs.detect-changes.outputs.services != '[]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Deploy gateway
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: gateway

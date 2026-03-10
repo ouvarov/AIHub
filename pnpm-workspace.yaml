@@ -1,0 +1,4 @@
+packages:
+  - "gateway"
+  - "*"
+  - "!_template"

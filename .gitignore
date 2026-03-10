@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+.idea/
+.DS_Store
+
+# Local Claude Code settings (per-user MCP server config)
+.claude/settings.local.json

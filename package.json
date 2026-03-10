@@ -1,0 +1,12 @@
+{
+  "name": "promova-ai-hub",
+  "private": true,
+  "scripts": {
+    "dev:gateway": "pnpm --filter gateway dev",
+    "deploy:gateway": "pnpm --filter gateway deploy"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "wrangler": "^4.0.0"
+  }
+}
