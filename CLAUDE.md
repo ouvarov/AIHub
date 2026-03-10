@@ -2,23 +2,34 @@
 
 ## 🔴 CRITICAL RULE — READ THIS FIRST
 
-**MCP Workers on Cloudflare CANNOT call external APIs directly (Jira, Figma, Slack, etc.).**
-**YOU (Claude) are the bridge.** You have MCP tools for Jira, Figma, Gandalf, Slack, Notion.
+**Two patterns for getting data. Choose the right one:**
 
-The Worker only does **pure logic** — processing data that YOU already gathered via your MCP tools.
+### Pattern 1 (default): Claude as bridge
+If Claude already has an MCP for the service (Jira, Figma, Gandalf, Slack, Notion) — **Claude gathers data and passes it to Worker.** Worker does pure logic only.
 
 ```
-❌ WRONG: Worker calls Jira API with fetch() and API token
-❌ WRONG: Worker calls Figma API directly
-❌ WRONG: Worker calls Gandalf API directly
-❌ WRONG: Creating a standalone server with express/fastify
-
-✅ RIGHT: Claude reads Jira ticket via Jira MCP → passes data to Worker
-✅ RIGHT: Claude searches code via Gandalf MCP → passes results to Worker
-✅ RIGHT: Claude gets Figma design via Figma MCP → passes context to Worker
-✅ RIGHT: Worker receives ALL data as input → does pure logic → returns result
-✅ RIGHT: Claude posts result back to Jira via Jira MCP
+✅ Claude reads Jira ticket via Jira MCP → passes data to Worker
+✅ Claude searches code via Gandalf MCP → passes results to Worker
+✅ Worker receives ALL data as input → does pure logic → returns result
+✅ Claude posts result back to Jira via Jira MCP
 ```
+
+### Pattern 2: Worker calls API directly (when user provides secrets)
+If user explicitly says "вот API URL и секрет" — Worker can call that API via fetch(). Secret goes to Vault → `ctx.env`.
+
+```
+✅ User: "Нужно пингануть Gringotts API, вот URL и токен"
+✅ Worker fetches secret from Vault → calls API with fetch()
+```
+
+### What is ALWAYS wrong:
+```
+❌ Worker calls Jira/Figma/Gandalf/Slack API directly — Claude has MCPs for these!
+❌ Creating a standalone server with express/fastify — use McpAgent.serve("/mcp")
+❌ Hardcoding API tokens in code — secrets go to Vault
+```
+
+**Decision: if Claude has an MCP for it → Pattern 1. If not and user gives secrets → Pattern 2.**
 
 **BEFORE writing ANY code**, read `_template/TEMPLATE.md` from the repo for the correct architecture pattern.
 
@@ -445,8 +456,8 @@ If ANY rule is violated — fix the code and re-check. Repeat until all pass.
 
 | # | Rule | How to check |
 |---|------|-------------|
-| 1 | **Worker does NOT call external APIs** | No `fetch()` to Jira, Figma, Gandalf, Slack. No API tokens in Worker. No express/fastify. |
-| 2 | **All external data comes via Claude's MCP tools** | Tool description says "BEFORE calling, gather: 1. Jira ticket via Jira MCP, 2. Code via Gandalf MCP..." |
+| 1 | **Worker does NOT call APIs that Claude has MCPs for** | No `fetch()` to Jira, Figma, Gandalf, Slack — Claude gathers this data. Exception: user explicitly provides API URL + secret for a service Claude has no MCP for → Pattern 2 (Vault). |
+| 2 | **Data source matches the right pattern** | Services with Claude MCP → tool description says "BEFORE calling, gather via MCP". Services without MCP + user-provided secrets → Worker fetches via Vault. |
 | 3 | **Skills are pure functions** | Each skill receives data as input, returns result. No fetch, no side effects (unless Vault). |
 | 4 | **Skills organized by DOMAIN** | `_shared/skills/jira/`, `_shared/skills/analysis/`, `_shared/skills/figma/` — NOT by feature name like `_shared/skills/preref/` |
 | 5 | **Skills are reusable** | A skill named `extract_figma_links` works for ANY text, not just pre-refinement |
