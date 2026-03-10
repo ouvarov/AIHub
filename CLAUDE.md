@@ -514,6 +514,13 @@ After all code is generated and reviewed, create a PR so the responsible person 
 | **Claude Web / Desktop** (GitHub integration connected) | Use the GitHub integration to create a branch, commit files, and open a PR directly |
 | **Claude Code** (terminal access) | Use `gh` CLI: `git checkout -b`, commit files, `gh pr create` |
 
+<!-- TODO: Add Gandalf as PR creation option.
+Gandalf ai_agents has post_run_actions: [{ type: "create_pr" }, { type: "assign_reviewers" }].
+Could trigger a lightweight agent run that just commits files and creates PR.
+This would work for users without GitHub integration in Claude Desktop.
+See: mcp__claude_ai_Gandalf__ai_agents (action: trigger_run, post_run_actions: create_pr)
+-->
+
 **Branch naming:** `feat/mcp-{service-name}` (e.g., `feat/mcp-review-analyzer`)
 
 **PR format:**
