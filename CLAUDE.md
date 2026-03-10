@@ -146,6 +146,9 @@ VAULT: {secrets needed, or "none"}
 | "Создай MCP", "new MCP server" | **New MCP** | Full cycle (skip Brainstorm only if request is crystal clear) |
 | "Обнови MCP", "добавь тул в preref" | **Update MCP** | Add/modify skills, agent, tools in existing service |
 | "Создай скил", "нужна функция для..." | **New Skill** | Create skill in `_shared/skills/{domain}/`. No MCP, no agent — just a reusable function |
+| "Создай агента", "нужен workflow для..." | **New Agent** | Create agent in `_shared/agents/` + skills it needs. No MCP service — agent is callable from any MCP |
+| "Обнови скил", "поправь extract-links" | **Update Skill** | Modify existing skill in `_shared/skills/{domain}/` |
+| "Обнови агента", "добавь шаг в preref" | **Update Agent** | Add/modify steps in existing agent in `_shared/agents/` |
 
 **Skill Runner** (`skill-runner/`) is a universal MCP server that auto-exposes all registered skills as tools. When you create a new skill, just add its import to `skill-runner/src/registry.ts` and it becomes callable from Claude Desktop.
 
@@ -400,6 +403,31 @@ AGENT UPDATE:
   _shared/agents/{name}.ts — add new step
 MCP TOOL UPDATE:
   {service}/src/tools/{tool}.ts — update schema/logic
+```
+
+**Mode: New Agent:**
+```
+NEW SKILLS (if needed):
+  _shared/skills/{domain}/{action}.ts — what it computes
+
+EXISTING SKILLS (reusing):
+  _shared/skills/{domain}/{action}.ts
+
+NEW AGENT:
+  _shared/agents/{name}.ts
+    Step 1: skill → what it processes
+    Step 2: skill → what it computes
+    Output: formatted result
+
+SKILL RUNNER:
+  skill-runner/src/registry.ts → add imports for new skills
+```
+
+**Mode: Update Skill / Update Agent:**
+```
+EXISTING FILE: _shared/skills/{domain}/{action}.ts (or _shared/agents/{name}.ts)
+CHANGE: {what exactly changes — new field, new step, bug fix}
+IMPACT: {list other skills/agents/MCP tools that use this}
 ```
 
 **Mode: New MCP** — full plan:
