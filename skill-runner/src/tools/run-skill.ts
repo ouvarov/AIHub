@@ -8,6 +8,38 @@ import { skills } from "../registry";
  * Input is passed as a JSON string (universal schema).
  */
 export function registerSkillTools(server: McpServer) {
+  // Builder entry point — returns architecture instructions
+  server.tool(
+    "start_building",
+    `Call this FIRST when user wants to create a new MCP service in AI Hub.
+Returns the architecture rules and templates. You MUST read and follow them before generating any code.
+Trigger words: "создай MCP", "новый сервис", "автоматизировать", "AI Hub", "аи хаб".`,
+    {},
+    async () => {
+      // Fetch CLAUDE.md and TEMPLATE.md from GitHub
+      const files = [
+        { name: "CLAUDE.md", url: "https://raw.githubusercontent.com/ouvarov/AIHub/main/CLAUDE.md" },
+        { name: "TEMPLATE.md", url: "https://raw.githubusercontent.com/ouvarov/AIHub/main/_template/TEMPLATE.md" },
+      ];
+
+      const results = await Promise.all(
+        files.map(async (f) => {
+          try {
+            const res = await fetch(f.url);
+            if (!res.ok) return `# ${f.name}\n\nFailed to fetch: ${res.status}`;
+            return `# ${f.name}\n\n${await res.text()}`;
+          } catch (e) {
+            return `# ${f.name}\n\nFetch error: ${e}`;
+          }
+        })
+      );
+
+      return {
+        content: [{ type: "text" as const, text: results.join("\n\n---\n\n") }],
+      };
+    },
+  );
+
   // List all available skills
   server.tool(
     "list_skills",
