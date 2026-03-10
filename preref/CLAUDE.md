@@ -6,7 +6,7 @@ Automates Jira pre-refinement. Given a ticket key → produces structured analys
 
 ## How to use
 
-Say: *"Проанализируй задачу PROJ-123"*
+Say: *"Analyze task PROJ-123"*
 
 Claude will:
 1. Read Repository Registry from Gandalf (`get_knowledge_page` path=`projects/repository-registry`)

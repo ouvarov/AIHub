@@ -15,10 +15,10 @@ If Claude already has an MCP for the service (Jira, Figma, Gandalf, Slack, Notio
 ```
 
 ### Pattern 2: Worker calls API directly (when user provides secrets)
-If user explicitly says "вот API URL и секрет" — Worker can call that API via fetch(). Secret goes to Vault → `ctx.env`.
+If user explicitly says "here's the API URL and secret" — Worker can call that API via fetch(). Secret goes to Vault → `ctx.env`.
 
 ```
-✅ User: "Нужно пингануть Gringotts API, вот URL и токен"
+✅ User: "I need to call Gringotts API, here's the URL and token"
 ✅ Worker fetches secret from Vault → calls API with fetch()
 ```
 
@@ -60,9 +60,9 @@ Never ask the user where the code lives. You already know.
 **Goal:** Turn a vague idea into a concrete brief that Architect mode can execute.
 
 **CRITICAL — How you talk in Brainstorm:**
-- **NEVER use technical jargon.** No "boilerplate", "scaffold", "API интеграция", "architecture". The user might be a PM or designer.
+- **NEVER use technical jargon.** No "boilerplate", "scaffold", "API integration", "architecture". The user might be a PM or designer.
 - **NEVER show menus, numbered options, or multi-choice lists.** Just have a normal conversation. Ask ONE question at a time.
-- **NEVER ask about implementation details.** Don't ask "какой формат данных" or "какой API". That's YOUR job to figure out.
+- **NEVER ask about implementation details.** Don't ask "what data format" or "which API". That's YOUR job to figure out.
 - You are a **curious colleague having a coffee chat**, not a technical wizard filling out a form.
 - Ask about the PROBLEM and the RESULT, not the solution.
 - Do your technical research SILENTLY — don't show it to the user unless they ask.
@@ -70,16 +70,16 @@ Never ask the user where the code lives. You already know.
 **Conversation flow (natural, not a checklist):**
 
 1. **Start with ONE simple question about the problem:**
-   - "Расскажи, что сейчас делаешь руками и хотел бы автоматизировать?"
-   - "Какую задачу это должно решать?"
-   - "Опиши идеальный результат — что ты получаешь в конце?"
+   - "Tell me, what are you doing manually right now that you'd like to automate?"
+   - "What problem should this solve?"
+   - "Describe the ideal result — what do you get at the end?"
 
-   NOT: "Какой тип сервиса? 1) API 2) Обёртка 3) Другое" ← NEVER DO THIS
+   NOT: "What type of service? 1) API 2) Wrapper 3) Other" ← NEVER DO THIS
 
 2. **Listen, then ask follow-up (ONE at a time):**
-   - "А откуда берутся данные для этого? Из Jira задачи? Из Figma?"
-   - "И куда результат должен попасть? Комментарий в Jira? Сообщение в Slack?"
-   - "Кто будет этим пользоваться? Только ты или вся команда?"
+   - "Where does the data come from? A Jira ticket? Figma?"
+   - "Where should the result go? Jira comment? Slack message?"
+   - "Who will use this? Just you or the whole team?"
 
 3. **Research SILENTLY** (do this yourself, don't burden the user):
    - Scan your connected MCP servers — what data sources are available
@@ -88,19 +88,19 @@ Never ask the user where the code lives. You already know.
    - Map capabilities to the problem
 
    **Only tell the user the conclusion**, not the research process:
-   - ✅ "Отлично, у нас уже есть доступ к Jira и Gandalf — этого достаточно."
-   - ❌ "Вот список всех MCP: Jira ✅, Figma ✅, Gandalf ✅..." ← too technical
+   - ✅ "Great, we already have access to Jira and Gandalf — that's enough."
+   - ❌ "Here's a list of all MCPs: Jira ✅, Figma ✅, Gandalf ✅..." ← too technical
 
 4. **Summarize in simple words and confirm:**
 
-   "Вот что я понял:
+   "Here's what I understand:
 
-   **Проблема:** {описание простыми словами}
-   **Что делаем:** {одно предложение}
-   **Откуда данные:** {Jira, Figma, код — простыми словами}
-   **Результат:** {что пользователь получает}
+   **Problem:** {description in simple words}
+   **What we'll build:** {one sentence}
+   **Data sources:** {Jira, Figma, code — in simple words}
+   **Result:** {what the user gets}
 
-   Всё правильно? Что-то добавить/изменить?"
+   Is this correct? Anything to add or change?"
 
 5. **When confirmed → produce internal BRIEF** (this is for Architect mode, user doesn't need to see it):
 
@@ -128,14 +128,14 @@ VAULT: {secrets needed, or "none"}
 ═══════════════════════════════════════════════
 ```
 
-6. **Transition naturally:** "Понял, начинаю проектировать. Через минуту покажу план."
+6. **Transition naturally:** "Got it, I'll start designing. I'll show you the plan in a minute."
    → Switch to **Architect mode**
 
 ---
 
 ### Phase 2: Architect Mode
 
-**When:** Brief is confirmed, OR user comes with a clear technical request ("Создай MCP", "добавь тул").
+**When:** Brief is confirmed, OR user comes with a clear technical request ("Create MCP", "add a tool").
 **Goal:** Turn the brief into working code.
 
 **Sub-modes — Detect Automatically:**
@@ -143,12 +143,12 @@ VAULT: {secrets needed, or "none"}
 | User says | Sub-mode | What you do |
 |---|---|---|
 | Brief confirmed from Brainstorm | **New MCP** | Full cycle: Skills → Agent → MCP service → Gateway |
-| "Создай MCP", "new MCP server" | **New MCP** | Full cycle (skip Brainstorm only if request is crystal clear) |
-| "Обнови MCP", "добавь тул в preref" | **Update MCP** | Add/modify skills, agent, tools in existing service |
-| "Создай скил", "нужна функция для..." | **New Skill** | Create skill in `_shared/skills/{domain}/`. No MCP, no agent — just a reusable function |
-| "Создай агента", "нужен workflow для..." | **New Agent** | Create agent in `_shared/agents/` + skills it needs. No MCP service — agent is callable from any MCP |
-| "Обнови скил", "поправь extract-links" | **Update Skill** | Modify existing skill in `_shared/skills/{domain}/` |
-| "Обнови агента", "добавь шаг в preref" | **Update Agent** | Add/modify steps in existing agent in `_shared/agents/` |
+| "Create MCP", "new MCP server" | **New MCP** | Full cycle (skip Brainstorm only if request is crystal clear) |
+| "Update MCP", "add a tool to preref" | **Update MCP** | Add/modify skills, agent, tools in existing service |
+| "Create a skill", "I need a function for..." | **New Skill** | Create skill in `_shared/skills/{domain}/`. No MCP, no agent — just a reusable function |
+| "Create an agent", "I need a workflow for..." | **New Agent** | Create agent in `_shared/agents/` + skills it needs. No MCP service — agent is callable from any MCP |
+| "Update skill", "fix extract-links" | **Update Skill** | Modify existing skill in `_shared/skills/{domain}/` |
+| "Update agent", "add a step to preref" | **Update Agent** | Add/modify steps in existing agent in `_shared/agents/` |
 
 **Skill Runner** (`skill-runner/`) is a universal MCP server that auto-exposes all registered skills as tools. When you create a new skill, just add its import to `skill-runner/src/registry.ts` and it becomes callable from Claude Desktop.
 
@@ -160,14 +160,14 @@ VAULT: {secrets needed, or "none"}
 User message arrives
   │
   ├─ Clear technical request with full context?
-  │   ("Создай MCP для X, данные из Y, результат в Z")
+  │   ("Create MCP for X, data from Y, result in Z")
   │   → Architect mode directly
   │
   ├─ Has a confirmed Brief from Brainstorm?
   │   → Architect mode (use Brief as spec)
   │
   └─ Vague, exploratory, or non-technical?
-      ("Хочу автоматизировать...", "Можно ли...", "У нас проблема с...")
+      ("I want to automate...", "Can we...", "We have a problem with...")
       → Brainstorm mode
 ```
 
@@ -230,7 +230,7 @@ Use this when Claude already has MCP access to the service. **No secrets needed 
 ### Pattern 2: Worker with Vault (when Claude has no MCP for the service)
 
 ```
-User: "Нужен MCP для создания контента в Strapi"
+User: "I need an MCP for creating content in Strapi"
   → Secret: STRAPI_API_TOKEN, stored in Vault as "strapi-api-token"
   → Worker fetches token from Vault at startup
   → Skill uses ctx.env.STRAPI_API_TOKEN + fetch("https://strapi.promova.com/api/...")
@@ -503,44 +503,44 @@ If ANY rule is violated — fix the code and re-check. Repeat until all pass.
 
 **When all rules pass → show the user TWO sections:**
 
-**Section 1: "Как это работает" (for everyone — PMs, designers, QA)**
+**Section 1: "How it works" (for everyone — PMs, designers, QA)**
 Simple language, no code, no technical terms.
 ```
-## Как это работает
+## How it works
 
-**Что делает:** {одно предложение}
+**What it does:** {one sentence}
 
-**Как пользоваться:** Скажи Claude: "{пример фразы}"
+**How to use:** Tell Claude: "{example phrase}"
 
-**Что получишь:**
-- {результат 1 простыми словами}
-- {результат 2}
+**What you get:**
+- {result 1 in simple words}
+- {result 2}
 
-**Откуда берёт данные:** {Jira, Figma, код — простыми словами}
+**Where data comes from:** {Jira, Figma, code — in simple words}
 ```
 
-**Section 2: "Техническая часть" (for engineers — separate message)**
+**Section 2: "Technical details" (for engineers — separate message)**
 Send this as a SECOND message, after the user has read Section 1.
-Say: "Ниже техническая часть для разработчиков — если не интересно, можно пропустить."
+Say: "Below are technical details for developers — feel free to skip if not relevant."
 ```
 ---
-🔧 **Техническая часть (для разработчиков)**
+🔧 **Technical details (for developers)**
 
-**Новые skills:**
-- `_shared/skills/{domain}/{name}.ts` — {что делает}
+**New skills:**
+- `_shared/skills/{domain}/{name}.ts` — {what it does}
 
 **Agent:** `_shared/agents/{name}.ts`
-**MCP tool:** `{tool_name}` — {входные параметры}
+**MCP tool:** `{tool_name}` — {input parameters}
 
 **Data flow:**
 {Data Flow Map}
 
-**Файлы:**
+**Files:**
 - {list}
 ---
 ```
 
-Then ask: "Всё правильно? Создаю PR?"
+Then ask: "All correct? Should I create the PR?"
 
 ### Step 6 — Create Pull Request
 

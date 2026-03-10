@@ -14,7 +14,7 @@ export interface FigmaDesignContext {
 }
 
 function extractComponentNames(text: string): string[] {
-  const patterns = [/Component\s*[:\-]\s*([^\n,]+)/gi, /компонент\s*[:\-]\s*([^\n,]+)/gi, /<([A-Z][A-Za-z]+)/g];
+  const patterns = [/Component\s*[:\-]\s*([^\n,]+)/gi, /<([A-Z][A-Za-z]+)/g];
   const found = new Set<string>();
   patterns.forEach((re) => { let m: RegExpExecArray | null; while ((m = re.exec(text)) !== null) found.add(m[1].trim()); });
   return [...found].slice(0, 10);

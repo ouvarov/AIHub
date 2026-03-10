@@ -43,9 +43,9 @@ function classifyType(line: string): RequirementType {
 
 function classifyPriority(line: string, index: number): RequirementPriority {
   const l = line.toLowerCase();
-  if (/must|required|critical|should have|нужно|обязательно/.test(l)) return "must";
-  if (/should|important|важно|желательно/.test(l)) return "should";
-  if (/could|nice.to.have|optional|можно/.test(l)) return "could";
+  if (/must|required|critical|should have|blocker/.test(l)) return "must";
+  if (/should|important|high priority|expected/.test(l)) return "should";
+  if (/could|nice.to.have|optional|low priority/.test(l)) return "could";
   return index < 3 ? "must" : "should";
 }
 
