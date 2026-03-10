@@ -1,9 +1,8 @@
-/**
- * Skill Registry — import all skills here.
- * skill-runner auto-registers each skill as an MCP tool.
- *
- * When you add a new skill to _shared/skills/, add its import here.
- * The Builder (CLAUDE.md) does this automatically.
- */
+import { resolveRepositories } from "../../_shared/skills/jira/resolve-repositories";
+import { extractRequirements } from "../../_shared/skills/jira/extract-requirements";
+import { extractDesignContext } from "../../_shared/skills/figma/extract-design-context";
+import { buildGapAnalysis } from "../../_shared/skills/analysis/build-gap-analysis";
+import { estimateEffort } from "../../_shared/skills/analysis/estimate-effort";
+import { formatPrerefReport } from "../../_shared/skills/formatting/format-preref-report";
 
-export const skills = [] as const;
+export const skills = [resolveRepositories, extractRequirements, extractDesignContext, buildGapAnalysis, estimateEffort, formatPrerefReport];
