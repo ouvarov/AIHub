@@ -15,7 +15,41 @@ function groupBy<T>(arr: T[], key: (i: T) => string): Record<string, T[]> {
 }
 
 export const formatPrerefReport = defineSkill<FormatPrerefInput, FormatPrerefOutput>(
-  { name: "formatting_format_preref_report", description: "Combine all pre-refinement data into Jira wiki markup and Markdown preview", service: "formatting", gather: [] },
+  {
+    name: "formatting_format_preref_report",
+    description: "Combine all pre-refinement data into Jira wiki markup and Markdown preview",
+    service: "formatting",
+    gather: [],
+    inputSchema: {
+      ticketKey: "PRMV-12345",
+      requirements: {
+        requirements: [{ id: "REQ-001", title: "...", description: "...", type: "functional", priority: "must", acceptanceCriteria: [] }],
+        rawSummary: "Ticket summary",
+        tags: ["react", "frontend"],
+        figmaLinks: ["https://figma.com/design/..."],
+      },
+      design: {
+        hasDesign: true,
+        summary: "Short description of the design",
+        links: ["https://figma.com/design/..."],
+        components: [],
+        notes: "",
+      },
+      gaps: {
+        gaps: [{ requirementId: "REQ-001", requirementTitle: "...", action: "create", description: "...", affectedFiles: [], complexity: "medium" }],
+        affectedRepositories: ["promova/monorepo"],
+        newFilesNeeded: [],
+        modifiedFilesNeeded: [],
+        summary: "1 requirements: 1 create, 0 modify, 0 reuse.",
+      },
+      effort: {
+        totalHours: { min: 2, max: 4 },
+        taskBreakdown: [{ type: "frontend", title: "Implement component", hours: { min: 2, max: 4 } }],
+        risks: [{ title: "Risk title", description: "Risk description", severity: "medium", mitigation: "Mitigation plan" }],
+        recommendation: "Ready for sprint.",
+      },
+    },
+  },
   async ({ ticketKey, requirements, design, gaps, effort }) => {
     const now = new Date().toISOString().split("T")[0];
     const byType = groupBy(requirements.requirements, (r) => r.type);
@@ -50,7 +84,7 @@ export const formatPrerefReport = defineSkill<FormatPrerefInput, FormatPrerefOut
     jira.push("", "h3. 🔧 Implementation Plan", `*${gaps.gaps.length} tasks* | Repos: ${gaps.affectedRepositories.join(", ") || "TBD"}`, "");
     gaps.gaps.forEach((g) => {
       jira.push(`h4. ${A[g.action] ?? "•"} ${g.action.toUpperCase()} — ${g.requirementTitle} (${C[g.complexity]})`, g.description);
-      if (g.affectedFiles.length) jira.push(`Files: {{${g.affectedFiles.join("}}, {{")}}}`);
+      if (g.affectedFiles.length) jira.push(`Files: {{${g.affectedFiles.join("}}, {{")}}}}`);
       jira.push("");
     });
     jira.push("h3. ⏱️ Effort Estimate", `*Total: ${effort.totalHours.min}–${effort.totalHours.max}h*`, "||Task||Type||Hours||");
