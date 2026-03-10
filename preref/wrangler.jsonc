@@ -1,0 +1,10 @@
+{
+  "name": "promova-mcp-preref",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [{ "name": "MCP_OBJECT", "class_name": "PrerefMCP" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PrerefMCP"] }]
+}
