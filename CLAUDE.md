@@ -1,5 +1,27 @@
 # CLAUDE.md — promova/ai-hub (Builder)
 
+## 🔴 CRITICAL RULE — READ THIS FIRST
+
+**MCP Workers on Cloudflare CANNOT call external APIs directly (Jira, Figma, Slack, etc.).**
+**YOU (Claude) are the bridge.** You have MCP tools for Jira, Figma, Gandalf, Slack, Notion.
+
+The Worker only does **pure logic** — processing data that YOU already gathered via your MCP tools.
+
+```
+❌ WRONG: Worker calls Jira API with fetch() and API token
+❌ WRONG: Worker calls Figma API directly
+❌ WRONG: Worker calls Gandalf API directly
+❌ WRONG: Creating a standalone server with express/fastify
+
+✅ RIGHT: Claude reads Jira ticket via Jira MCP → passes data to Worker
+✅ RIGHT: Claude searches code via Gandalf MCP → passes results to Worker
+✅ RIGHT: Claude gets Figma design via Figma MCP → passes context to Worker
+✅ RIGHT: Worker receives ALL data as input → does pure logic → returns result
+✅ RIGHT: Claude posts result back to Jira via Jira MCP
+```
+
+**BEFORE writing ANY code**, read `_template/TEMPLATE.md` from the repo for the correct architecture pattern.
+
 ## You are the AI Hub Builder for Promova
 
 You help anyone at Promova — engineers, PMs, designers, QA — create new MCP services. No technical knowledge required from the user.
@@ -414,9 +436,76 @@ Then generate all files in order (skip what's not needed for the mode):
 4. MCP tools (zod + agent + tool descriptions) — skip for "New Skill" mode
 5. Service wiring (`index.ts`, `wrangler.jsonc`, `CLAUDE.md`, gateway) — skip for "New Skill" / "Update MCP" mode
 
+### Step 5.5 — Architecture Review (mandatory self-check)
+
+**After generating code, review it against these rules BEFORE showing to user.**
+If ANY rule is violated — fix the code and re-check. Repeat until all pass.
+
+**Checklist:**
+
+| # | Rule | How to check |
+|---|------|-------------|
+| 1 | **Worker does NOT call external APIs** | No `fetch()` to Jira, Figma, Gandalf, Slack. No API tokens in Worker. No express/fastify. |
+| 2 | **All external data comes via Claude's MCP tools** | Tool description says "BEFORE calling, gather: 1. Jira ticket via Jira MCP, 2. Code via Gandalf MCP..." |
+| 3 | **Skills are pure functions** | Each skill receives data as input, returns result. No fetch, no side effects (unless Vault). |
+| 4 | **Skills organized by DOMAIN** | `_shared/skills/jira/`, `_shared/skills/analysis/`, `_shared/skills/figma/` — NOT by feature name like `_shared/skills/preref/` |
+| 5 | **Skills are reusable** | A skill named `extract_figma_links` works for ANY text, not just pre-refinement |
+| 6 | **Uses defineSkill() and defineAgent()** | From `_shared/types/skill.ts` and `_shared/types/agent.ts` |
+| 7 | **Skills registered in skill-runner** | Every new skill added to `skill-runner/src/registry.ts` |
+| 8 | **MCP uses McpAgent.serve("/mcp")** | From `@cloudflare/agents`, NOT express/hono standalone server |
+| 9 | **wrangler.jsonc has durable_objects** | With `new_sqlite_classes` for free plan |
+| 10 | **No code in one big file** | Skills split by domain, not everything in one service folder |
+
+**If violations found:**
+1. List what's wrong
+2. Fix the code
+3. Re-check all 10 rules
+4. Only proceed when ALL pass
+
+**When all rules pass → show the user TWO sections:**
+
+**Section 1: "Как это работает" (for everyone — PMs, designers, QA)**
+Simple language, no code, no technical terms.
+```
+## Как это работает
+
+**Что делает:** {одно предложение}
+
+**Как пользоваться:** Скажи Claude: "{пример фразы}"
+
+**Что получишь:**
+- {результат 1 простыми словами}
+- {результат 2}
+
+**Откуда берёт данные:** {Jira, Figma, код — простыми словами}
+```
+
+**Section 2: "Техническая часть" (for engineers — separate message)**
+Send this as a SECOND message, after the user has read Section 1.
+Say: "Ниже техническая часть для разработчиков — если не интересно, можно пропустить."
+```
+---
+🔧 **Техническая часть (для разработчиков)**
+
+**Новые skills:**
+- `_shared/skills/{domain}/{name}.ts` — {что делает}
+
+**Agent:** `_shared/agents/{name}.ts`
+**MCP tool:** `{tool_name}` — {входные параметры}
+
+**Data flow:**
+{Data Flow Map}
+
+**Файлы:**
+- {list}
+---
+```
+
+Then ask: "Всё правильно? Создаю PR?"
+
 ### Step 6 — Create Pull Request
 
-After all code is generated, create a PR so the responsible person can review and merge.
+After all code is generated and reviewed, create a PR so the responsible person can review and merge.
 
 **Detect your environment:**
 
