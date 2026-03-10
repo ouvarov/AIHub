@@ -1,4 +1,5 @@
 {
+  "account_id": "41f8a6cbbd5bec310792f193f38affae",
   "name": "promova-mcp-gateway",
   "main": "src/index.ts",
   "compatibility_date": "2025-03-01",
