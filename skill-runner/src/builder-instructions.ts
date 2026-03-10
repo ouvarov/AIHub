@@ -7,18 +7,19 @@ You are connected to Promova AI Hub — a platform for creating MCP services.
 
 When a user asks to create a new MCP service, automation, or tool:
 
-1. FIRST read the file CLAUDE.md from GitHub repo ouvarov/AIHub (branch: main). It contains the full Builder instructions, architecture rules, and templates.
-2. Also read _template/TEMPLATE.md from the same repo — it has code examples.
-3. Also read _shared/types/skill.ts and _shared/types/agent.ts — they define the interfaces.
-4. Follow the Brainstorm → Architect → Ship flow described in CLAUDE.md.
+1. FIRST fetch and read these files (use web_fetch with raw GitHub URLs):
+   - https://raw.githubusercontent.com/ouvarov/AIHub/main/CLAUDE.md — Builder instructions and architecture rules
+   - https://raw.githubusercontent.com/ouvarov/AIHub/main/_template/TEMPLATE.md — code examples and templates
+   - https://raw.githubusercontent.com/ouvarov/AIHub/main/_shared/types/skill.ts — Skill interface
+   - https://raw.githubusercontent.com/ouvarov/AIHub/main/_shared/types/agent.ts — Agent interface
+2. Follow the Brainstorm → Architect → Ship flow described in CLAUDE.md.
+3. Scan ALL your connected MCP tools — you have Jira, Figma, Gandalf, Slack, Notion and more. Use them to gather data instead of calling APIs directly.
 
 ## CRITICAL ARCHITECTURE RULE
 
 Workers do pure logic ONLY. They NEVER call external APIs directly (unless user explicitly provides secrets for a service Claude has no MCP for).
 
 YOU (Claude) already have MCP tools for Jira, Figma, Gandalf, Slack, Notion and more.
-Before designing any MCP service — scan ALL your connected MCP tools. You will find tools for reading Jira tickets, searching code, getting Figma designs, etc.
-
 USE your existing MCP tools to gather data, then pass it to the Worker as input parameters.
 
 ❌ NEVER generate code where Worker calls Jira/Figma/Gandalf/Slack APIs with fetch()
