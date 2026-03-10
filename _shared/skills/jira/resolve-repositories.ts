@@ -33,8 +33,8 @@ function parseRegistry(markdown: string): RepositoryEntry[] {
     const projectId = lines[0].trim();
     if (!projectId.includes("/")) continue;
     const githubMatch = section.match(/\*\*GitHub:\*\*\s*(https?:\/\/\S+)/);
-    const descMatch = section.match(/\*\*Описание:\*\*\s*(.+)/);
-    const kwMatch = section.match(/\*\*Ключевые слова:\*\*\s*(.+)/);
+    const descMatch = section.match(/\*\*Description:\*\*\s*(.+)/);
+    const kwMatch = section.match(/\*\*Keywords:\*\*\s*(.+)/);
     entries.push({
       projectId,
       githubUrl: githubMatch?.[1]?.trim() ?? "",
@@ -69,7 +69,7 @@ export const resolveRepositories = defineSkill<ResolveRepositoriesInput, Resolve
   async ({ ticketData, registryContent }) => {
     const repos = parseRegistry(registryContent);
     if (repos.length === 0) {
-      return { resolvedProjectIds: [], needsClarification: true, clarificationQuestion: "Не удалось загрузить реестр репозиториев из Gandalf. В каком репозитории искать код?", allRepositories: [], confidence: "low" };
+      return { resolvedProjectIds: [], needsClarification: true, clarificationQuestion: "Could not load repository registry from Gandalf. Which repository should I search for code?", allRepositories: [], confidence: "low" };
     }
     const scored = repos.map((r) => ({ repo: r, points: scoreRepo(r, ticketData) })).sort((a, b) => b.points - a.points);
     const topPoints = scored[0].points;
@@ -91,5 +91,5 @@ export const resolveRepositories = defineSkill<ResolveRepositoriesInput, Resolve
 
 function buildQuestion(summary: string, repos: RepositoryEntry[]): string {
   const options = repos.map((r) => `- \`${r.projectId}\` — ${r.description}`).join("\n");
-  return `Не могу однозначно определить репозиторий для задачи "${summary}".\n\nВ каком репозитории искать код?\n${options}`;
+  return `Cannot determine the repository for task "${summary}".\n\nWhich repository should I search for code?\n${options}`;
 }

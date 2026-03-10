@@ -43,7 +43,7 @@ Post jiraWikiMarkup via Jira MCP addCommentToJiraIssue.`,
     async ({ ticketData, codeResults, figmaDesignContext, repositoryRegistryContent }) => {
       const result = await prerefAnalyzer.execute({ ticketData, codeResults, figmaDesignContext, repositoryRegistryContent });
       if (result.needsClarification) {
-        return { content: [{ type: "text" as const, text: `⚠️ Требуется уточнение\n\n${result.clarificationQuestion}\n\nПосле ответа пользователя — запусти semantic_search и вызови preref_analyze снова.` }] };
+        return { content: [{ type: "text" as const, text: `⚠️ Clarification needed\n\n${result.clarificationQuestion}\n\nAfter the user responds — run semantic_search and call preref_analyze again.` }] };
       }
       return {
         content: [

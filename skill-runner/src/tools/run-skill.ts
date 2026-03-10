@@ -11,7 +11,7 @@ export function registerSkillTools(server: McpServer) {
   // Builder entry point — returns architecture instructions
   server.tool(
     "start_building",
-    `Call this FIRST when user wants to create a new MCP service in AI Hub.\nReturns the architecture rules and templates. You MUST read and follow them before generating any code.\nTrigger words: "создай MCP", "новый сервис", "автоматизировать", "AI Hub", "аи хаб".`,
+    `Call this FIRST when user wants to create, update, or modify anything in AI Hub (skills, agents, MCP services).\nReturns the architecture rules and templates. You MUST read and follow them before generating any code.\nTrigger words: "create MCP", "new service", "automate", "AI Hub", "add skill", "add agent", "update skill", "update agent".`,
     {},
     async () => {
       // Fetch CLAUDE.md and TEMPLATE.md from GitHub
