@@ -50,7 +50,7 @@ function classifyPriority(line: string, index: number): RequirementPriority {
 }
 
 function extractFigmaLinks(text: string): string[] {
-  const re = /https:\/\/(?:www\.)?figma\.com\/(?:file|design)\/[^\s\)\"']+/g;
+  const re = /https:\/\/(?:www\.)?figma\.com\/(?:file|design)\/[^\s\)\\"']+/g;
   return [...new Set(text.match(re) ?? [])];
 }
 
@@ -71,6 +71,19 @@ export const extractRequirements = defineSkill<{ ticketData: JiraTicketData }, E
     description: "Parse Jira ticket fields into a structured requirements list with types and priorities",
     service: "jira",
     gather: ["Full Jira ticket data — summary, description, labels, components, linked issues"],
+    inputSchema: {
+      ticketData: {
+        key: "PRMV-12345",
+        summary: "Ticket summary",
+        description: "Ticket description",
+        issueType: "Task",
+        priority: "Medium",
+        labels: [],
+        components: [],
+        acceptanceCriteria: "optional string",
+        linkedIssues: [{ key: "PRMV-111", type: "relates to", summary: "Related ticket" }],
+      },
+    },
   },
   async ({ ticketData }) => {
     const fullText = [ticketData.summary, ticketData.description ?? "", ticketData.acceptanceCriteria ?? ""].join("\n");
