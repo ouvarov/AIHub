@@ -6,3 +6,4 @@ import { estimateEffort } from "../../_shared/skills/analysis/estimate-effort";
 import { formatPrerefReport } from "../../_shared/skills/formatting/format-preref-report";
 
 export const skills = [resolveRepositories, extractRequirements, extractDesignContext, buildGapAnalysis, estimateEffort, formatPrerefReport];
+export const agents: any[] = [];

@@ -1,6 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { skills } from "../registry";
+import { skills, agents } from "../registry";
 
 /**
  * Auto-register all skills from the registry as MCP tools.
@@ -54,6 +54,52 @@ export function registerSkillTools(server: McpServer) {
       return {
         content: [{ type: "text" as const, text: JSON.stringify(list, null, 2) }],
       };
+    },
+  );
+
+  // List all available agents
+  server.tool(
+    "list_agents",
+    "List all available agents with their names, descriptions, and which skills they use.",
+    {},
+    async () => {
+      const list = agents.map((a) => ({
+        name: a.meta.name,
+        description: a.meta.description,
+        skills: a.meta.skills,
+      }));
+
+      return {
+        content: [{ type: "text" as const, text: JSON.stringify(list, null, 2) }],
+      };
+    },
+  );
+
+  // List all deployed MCP services (fetches from gateway)
+  server.tool(
+    "list_services",
+    "List all deployed MCP services registered in the gateway. Returns service names, descriptions, URLs, skills, and agents.",
+    {},
+    async () => {
+      try {
+        const res = await fetch("https://promova-mcp-gateway.workers.dev/services");
+        if (!res.ok) {
+          return {
+            content: [{ type: "text" as const, text: `Failed to fetch services: ${res.status}` }],
+            isError: true,
+          };
+        }
+        const data = await res.text();
+        return {
+          content: [{ type: "text" as const, text: data }],
+        };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: "text" as const, text: `Error fetching services: ${message}` }],
+          isError: true,
+        };
+      }
     },
   );
 

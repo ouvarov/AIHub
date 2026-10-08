@@ -542,6 +542,33 @@ Say: "Below are technical details for developers — feel free to skip if not re
 
 Then ask: "All correct? Should I create the PR?"
 
+### Step 5.7 — Generate ADR (mandatory for new skills, agents, and MCP services)
+
+**After code passes review, generate an ADR (Architecture Decision Record).**
+
+ADR file: `docs/adr/{NNN}-{kebab-case-name}.md`
+- Number: next sequential number (check existing files in `docs/adr/`)
+- Template: `docs/adr/template.md`
+
+**CRITICAL — "User Request" section:**
+Copy the user's EXACT messages from the conversation — every message from Brainstorm phase and any clarifications during Architect phase. This is the most valuable part of the ADR. It captures:
+- The original problem in the user's own words
+- Context that won't exist anywhere else (why now, what's broken, who asked)
+- Links the user shared (Jira tickets, Figma files, Slack threads)
+- Corrections and clarifications ("no not that, I meant...")
+
+**Do NOT paraphrase or summarize the user's words.** Copy them verbatim. A PM's "ugh, I spend 2 hours every Monday copy-pasting from Jira to Confluence" is more useful than "User wanted to automate report generation."
+
+**What to fill in:**
+- `User Request` — verbatim user messages (the "why" in their words)
+- `Brief` — from Brainstorm output
+- `Decision` — pattern chosen, data sources, what was created/reused
+- `Data Flow` — copy from Step 1
+- `Alternatives Considered` — if discussed
+- `Consequences` — what this enables, depends on, limitations
+
+**Include the ADR in the PR** alongside the code.
+
 ### Step 6 — Create Pull Request
 
 After all code is generated and reviewed, create a PR so the responsible person can review and merge.
@@ -574,6 +601,7 @@ Title: Add {service-name} MCP service
 - Agent: {agent name and what it orchestrates}
 - MCP tools: {tool names and what they accept}
 - Gateway: registered in registry
+- ADR: `docs/adr/{NNN}-{name}.md`
 
 ## Data flow
 {Copy the Data Flow Map from Step 1}
@@ -626,6 +654,7 @@ Tools with rich zod schemas. Tool descriptions tell Claude what to gather before
 | MCP tool name | `snake_case`: `preref_analyze` |
 | MCP return | `{ content: [{ type: "text", text: ... }] }` |
 | Secrets | Never hardcode. Vault via `SkillContext.env` |
+| ADR file | `docs/adr/{NNN}-{kebab-case-name}.md` — generated for every new skill, agent, or MCP service |
 
 ---
 
